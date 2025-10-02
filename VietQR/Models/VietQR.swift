@@ -1,38 +1,66 @@
-//
-//  VietQR.swift
-//  VietQR
-//
-//  Created by admin on 30/9/25.
-//
+// MARK: - Helper Methods
 
-/// VietQR standard data structure
-public struct VietQR2 {
-    public let bankBin: String
-    public let accountNumber: String
-    public let template: String
-    public let amount: String?
-    public let description: String?
-    public let accountName: String?
+    /// Parse TLV (Tag-Length-Value) format string
+    /// - Parameter data: TLV formatted string
+    /// - Returns: Dictionary of tag-value pairs
+    public func parseTLV(_ data: String) -> [String: String] {
+        var result: [String: String] = [:]
+        var index = data.startIndex
 
-    public init(
-        bankBin: String,
-        accountNumber: String,
-        template: String = "compact2",
-        amount: String? = nil,
-        description: String? = nil,
-        accountName: String? = nil
-    ) {
-        self.bankBin = bankBin
-        self.accountNumber = accountNumber
-        self.template = template
-        self.amount = amount
-        self.description = description
-        self.accountName = accountName
+        while index < data.endIndex {
+            guard data.distance(from: index, to: data.endIndex) >= 4 else { break }
+
+            let tagEnd = data.index(index, offsetBy: 2)
+            let tag = String(data[index..<tagEnd])
+
+            let lengthEnd = data.index(tagEnd, offsetBy: 2)
+            let lengthStr = String(data[tagEnd..<lengthEnd])
+            guard let length = Int(lengthStr) else { break }
+
+            guard data.distance(from: lengthEnd, to: data.endIndex) >= length else { break }
+
+            let valueEnd = data.index(lengthEnd, offsetBy: length)
+            let value = String(data[lengthEnd..<valueEnd])
+
+            result[tag] = value
+            index = valueEnd
+        }
+
+        return result
     }
-}
 
-// MARK: - VietQR Core Library
+    /// Build TLV formatted string
+    /// - Parameters:
+    ///   - tag: 2-character tag
+    ///   - value: Value string
+    /// - Returns: TLV formatted string (Tag + Length + Value)
+    public func buildTLV(_ tag: String, _ value: String) -> String {
+        let length = String(format: "%02d", value.count)
+        return "\(tag)\(length)\(value)"
+    }
+
+    /// Calculate CRC-16/CCITT-FALSE checksum
+    /// - Parameter data: Data string including "6304" but excluding CRC value
+    /// - Returns: 4-character hex CRC value
+    public func calculateCRC(_ data: String) -> String {
+        let bytes = Array(data.utf8)
+        var crc: UInt16 = 0xFFFF
+
+        for byte in bytes {
+            crc ^= UInt16(byte) << 8
+            for _ in 0..<8 {
+                if (crc & 0x8000) != 0 {
+                    crc = (crc << 1) ^ 0x1021
+                } else {
+                    crc = crc << 1
+                }
+            }
+        }
+
+        return String(format: "%04X", crc & 0xFFFF)
+    }// MARK: - VietQR Core Library
 // File: VietQR.swift
+// Based on official NAPAS VietQR specification v1.0 (September 2021)
 
 import Foundation
 import UIKit
@@ -40,42 +68,55 @@ import CoreImage
 
 // MARK: - Models
 
-/// VietQR data model following EMV QCO specification
+/// VietQR data model following EMV QCO specification and NAPAS VietQR standard
 public struct VietQR {
-    public var bankBin: String
-    public var accountNumber: String
-    public var amount: String?
-    public var description: String?
+    // Merchant Account Information (Tag 38)
+    public var bankBin: String              // Acquirer/BNB ID (6 digits)
+    public var accountNumber: String        // Consumer ID / Account Number
+    public var accountName: String?         // Merchant Name (Tag 59)
+    public var amount: String?              // Transaction Amount (Tag 54)
+    public var purpose: String?             // Purpose of Transaction (Tag 62-08)
 
-    // EMV Standard fields
-    public var serviceCode: String = "QRIBFTTA"
+    // Service codes
+    public var serviceCode: String = "QRIBFTTA"  // QRIBFTTA (account) or QRIBFTTC (card)
+
+    // Additional data from Tag 62
     public var additionalData: AdditionalData?
 
     public struct AdditionalData {
-        public var purpose: String?
-        public var reference: String?
-        public var billNumber: String?
-        public var mobileNumber: String?
-        public var store: String?
+        public var billNumber: String?          // Tag 62-01
+        public var mobileNumber: String?        // Tag 62-02
+        public var store: String?               // Tag 62-03
+        public var loyaltyNumber: String?       // Tag 62-04
+        public var reference: String?           // Tag 62-05
+        public var customerLabel: String?       // Tag 62-06
+        public var terminal: String?            // Tag 62-07
+        public var purpose: String?             // Tag 62-08
 
-        public init(purpose: String? = nil, reference: String? = nil, billNumber: String? = nil,
-                    mobileNumber: String? = nil, store: String? = nil) {
-            self.purpose = purpose
-            self.reference = reference
+        public init(billNumber: String? = nil, mobileNumber: String? = nil, store: String? = nil,
+                    loyaltyNumber: String? = nil, reference: String? = nil, customerLabel: String? = nil,
+                    terminal: String? = nil, purpose: String? = nil) {
             self.billNumber = billNumber
             self.mobileNumber = mobileNumber
             self.store = store
+            self.loyaltyNumber = loyaltyNumber
+            self.reference = reference
+            self.customerLabel = customerLabel
+            self.terminal = terminal
+            self.purpose = purpose
         }
     }
 
-    public init(bankBin: String, accountNumber: String, amount: String? = nil, description: String? = nil) {
+    public init(bankBin: String, accountNumber: String, accountName: String? = nil,
+                amount: String? = nil, purpose: String? = nil) {
         self.bankBin = bankBin
         self.accountNumber = accountNumber
+        self.accountName = accountName
         self.amount = amount
-        self.description = description
+        self.purpose = purpose
 
-        if let desc = description {
-            self.additionalData = AdditionalData(purpose: desc)
+        if let purpose = purpose {
+            self.additionalData = AdditionalData(purpose: purpose)
         }
     }
 }
@@ -86,49 +127,78 @@ public class VietQRService {
     public static let shared = VietQRService()
     private init() {}
 
+    private let GUID = "A000000727"  // NAPAS AID
+
     // MARK: - Parse from String
 
     /// Parse VietQR from EMV QCO string format
-    /// - Parameter qrString: EMV format string (e.g., "00020101021238570010A000000727...")
+    /// Example: "00020101021238570010A00000072701270006970436011300110018008790208QRIBFTTA530370454061000005802VN62130809nhan tien6304D1EF"
+    /// - Parameter qrString: EMV format string
     /// - Returns: VietQR object or nil if parsing fails
     public func parse(from qrString: String) -> VietQR? {
         let fields = parseTLV(qrString)
 
-        // Validate format
+        // Validate payload format indicator (Tag 00 = "01")
         guard fields["00"] == "01" else { return nil }
 
-        // Parse merchant info (Tag 38 for VietQR)
+        // Parse merchant account information (Tag 38 for VietQR)
         guard let merchantInfo = fields["38"] else { return nil }
         let merchantFields = parseTLV(merchantInfo)
 
-        guard let bankBin = merchantFields["01"],
-              let accountNumber = merchantFields["02"] else {
+        // Validate GUID (Tag 00 = "A000000727")
+        guard merchantFields["00"] == GUID else { return nil }
+
+        // Parse BNB structure (Tag 01)
+        guard let bnbInfo = merchantFields["01"] else { return nil }
+        let bnbFields = parseTLV(bnbInfo)
+
+        // Extract Bank BIN (Tag 00) and Account Number (Tag 01)
+        guard let bankBin = bnbFields["00"],
+              let accountNumber = bnbFields["01"] else {
             return nil
         }
 
-        var vietQR = VietQR(bankBin: bankBin, accountNumber: accountNumber)
+        // Service code (Tag 02)
+        let serviceCode = merchantFields["02"] ?? "QRIBFTTA"
 
-        // Optional amount
-        vietQR.amount = fields["54"]
+        // Transaction amount (Tag 54)
+        // Transaction amount (Tag 54)
+        let amount = fields["54"]
 
-        // Parse additional data
+        // Merchant name / Account name (Tag 59)
+        let accountName = fields["59"]
+
+        // Parse additional data (Tag 62)
+        var purpose: String? = nil
+        var additionalData: VietQR.AdditionalData? = nil
+
         if let additionalInfo = fields["62"] {
             let additionalFields = parseTLV(additionalInfo)
-            var additionalData = VietQR.AdditionalData()
-            additionalData.purpose = additionalFields["08"]
-            additionalData.reference = additionalFields["05"]
-            additionalData.billNumber = additionalFields["01"]
-            additionalData.mobileNumber = additionalFields["02"]
-            additionalData.store = additionalFields["03"]
 
-            vietQR.additionalData = additionalData
-            vietQR.description = additionalData.purpose
+            var data = VietQR.AdditionalData()
+            data.billNumber = additionalFields["01"]
+            data.mobileNumber = additionalFields["02"]
+            data.store = additionalFields["03"]
+            data.loyaltyNumber = additionalFields["04"]
+            data.reference = additionalFields["05"]
+            data.customerLabel = additionalFields["06"]
+            data.terminal = additionalFields["07"]
+            data.purpose = additionalFields["08"]
+
+            additionalData = data
+            purpose = data.purpose
         }
 
-        // Service code
-        if let serviceCode = merchantFields["03"] {
-            vietQR.serviceCode = serviceCode
-        }
+        var vietQR = VietQR(
+            bankBin: bankBin,
+            accountNumber: accountNumber,
+            accountName: accountName,
+            amount: amount,
+            purpose: purpose
+        )
+
+        vietQR.serviceCode = serviceCode
+        vietQR.additionalData = additionalData
 
         return vietQR
     }
@@ -137,7 +207,7 @@ public class VietQRService {
 
     /// Generate EMV QCO string from VietQR object
     /// - Parameter vietQR: VietQR object
-    /// - Returns: EMV format string
+    /// - Returns: EMV format string compliant with NAPAS VietQR spec
     public func generate(from vietQR: VietQR) -> String {
         var result = ""
 
@@ -145,14 +215,26 @@ public class VietQRService {
         result += buildTLV("00", "01")
 
         // 01: Point of Initiation Method (11 = static, 12 = dynamic)
-        result += buildTLV("01", "11")
+        let isStatic = vietQR.amount == nil || vietQR.amount?.isEmpty == true
+        result += buildTLV("01", isStatic ? "11" : "12")
 
         // 38: Merchant Account Information (VietQR)
+        // Structure: Tag 38 contains nested TLV
+        //   - Tag 00: GUID (A000000727)
+        //   - Tag 01: BNB structure
+        //     - Tag 00: Bank BIN (6 digits)
+        //     - Tag 01: Account Number
+        //   - Tag 02: Service Code (QRIBFTTA or QRIBFTTC)
+
+        var bnbInfo = ""
+        bnbInfo += buildTLV("00", vietQR.bankBin)
+        bnbInfo += buildTLV("01", vietQR.accountNumber)
+
         var merchantInfo = ""
-        merchantInfo += buildTLV("00", "A000000727")  // GUID
-        merchantInfo += buildTLV("01", vietQR.bankBin)
-        merchantInfo += buildTLV("02", vietQR.accountNumber)
-        merchantInfo += buildTLV("03", vietQR.serviceCode)
+        merchantInfo += buildTLV("00", GUID)
+        merchantInfo += buildTLV("01", bnbInfo)
+        merchantInfo += buildTLV("02", vietQR.serviceCode)
+
         result += buildTLV("38", merchantInfo)
 
         // 53: Transaction Currency (704 = VND)
@@ -166,32 +248,50 @@ public class VietQRService {
         // 58: Country Code
         result += buildTLV("58", "VN")
 
+        // 59: Merchant Name (Account Name) - optional
+        if let accountName = vietQR.accountName, !accountName.isEmpty {
+            result += buildTLV("59", accountName)
+        }
+
         // 62: Additional Data (optional)
         if let additional = vietQR.additionalData {
             var additionalStr = ""
 
-            if let billNumber = additional.billNumber {
+            if let billNumber = additional.billNumber, !billNumber.isEmpty {
                 additionalStr += buildTLV("01", billNumber)
             }
-            if let mobile = additional.mobileNumber {
+            if let mobile = additional.mobileNumber, !mobile.isEmpty {
                 additionalStr += buildTLV("02", mobile)
             }
-            if let store = additional.store {
+            if let store = additional.store, !store.isEmpty {
                 additionalStr += buildTLV("03", store)
             }
-            if let reference = additional.reference {
+            if let loyalty = additional.loyaltyNumber, !loyalty.isEmpty {
+                additionalStr += buildTLV("04", loyalty)
+            }
+            if let reference = additional.reference, !reference.isEmpty {
                 additionalStr += buildTLV("05", reference)
             }
-            if let purpose = additional.purpose {
+            if let customer = additional.customerLabel, !customer.isEmpty {
+                additionalStr += buildTLV("06", customer)
+            }
+            if let terminal = additional.terminal, !terminal.isEmpty {
+                additionalStr += buildTLV("07", terminal)
+            }
+            if let purpose = additional.purpose, !purpose.isEmpty {
                 additionalStr += buildTLV("08", purpose)
             }
 
             if !additionalStr.isEmpty {
                 result += buildTLV("62", additionalStr)
             }
+        } else if let purpose = vietQR.purpose, !purpose.isEmpty {
+            // If no additionalData but purpose exists, create it
+            let additionalStr = buildTLV("08", purpose)
+            result += buildTLV("62", additionalStr)
         }
 
-        // 63: CRC (always last)
+        // 63: CRC (always last) - ISO/IEC 13239 using polynomial '1021' (hex) and initial value 'FFFF' (hex)
         result += "6304"
         let crc = calculateCRC(result)
         result += crc
@@ -327,12 +427,16 @@ extension VietQR {
         Account: \(accountNumber)
         """
 
+        if let accountName = accountName {
+            info += "\nAccount Name: \(accountName)"
+        }
+
         if let amount = amount {
             info += "\nAmount: \(formatAmount(amount)) VND"
         }
 
-        if let desc = description {
-            info += "\nDescription: \(desc)"
+        if let purpose = purpose {
+            info += "\nPurpose: \(purpose)"
         }
 
         if let ref = additionalData?.reference {
@@ -609,8 +713,9 @@ class ViewController: UIViewController {
         let vietQR = VietQR(
             bankBin: bin,
             accountNumber: account,
+            accountName: nil,
             amount: amountField.text,
-            description: descField.text
+            purpose: descField.text
         )
 
         let qrString = VietQRService.shared.generate(from: vietQR)
@@ -637,21 +742,68 @@ class ViewController: UIViewController {
     }
 
     @objc private func testTapped() {
-        // Test with your sample
-        let sample = "00020101021238570010A00000072701270006970436011300110018008790208QRIBFTTA530370454061000005802VN630488E4"
+        // Test with your actual sample from NAPAS spec
+        let sample = "00020101021238570010A00000072701270006970436011300110018008790208QRIBFTTA530370454061000005802VN62130809nhan tien6304D1EF"
+
+        print("=== Testing VietQR Parser ===")
+        print("Input: \(sample)")
+        print("")
 
         if let vietQR = VietQRService.shared.parse(from: sample) {
+            print("✅ Parsed Successfully!")
+            print("")
+            print("Bank BIN: \(vietQR.bankBin)")
+            print("Account Number: \(vietQR.accountNumber)")
+            print("Account Name: \(vietQR.accountName ?? "N/A")")
+            print("Amount: \(vietQR.amount ?? "N/A")")
+            print("Purpose: \(vietQR.purpose ?? "N/A")")
+            print("Service Code: \(vietQR.serviceCode)")
+
+            // Verify bank
+            if let bank = BankDirectory.shared.getBank(bin: vietQR.bankBin) {
+                print("Bank Name: \(bank.shortName)")
+            }
+
+            // Update UI
             bankBinField.text = vietQR.bankBin
             accountField.text = vietQR.accountNumber
             amountField.text = vietQR.amount
-            descField.text = vietQR.description
+            descField.text = vietQR.purpose
 
-            resultLabel.text = "✅ Parsed:\n\n" + vietQR.displayInfo
+            resultLabel.text = "✅ Parsed from sample:\n\n" + vietQR.displayInfo
 
+            // Generate QR image to verify round-trip
             if let image = VietQRService.shared.generateQRImage(from: vietQR) {
                 qrImageView.image = image
+
+                // Test regeneration
+                let regenerated = VietQRService.shared.generate(from: vietQR)
+                print("")
+                print("Regenerated: \(regenerated)")
+
+                // Verify CRC
+                let originalCRC = String(sample.suffix(4))
+                let regeneratedCRC = String(regenerated.suffix(4))
+                print("")
+                print("Original CRC: \(originalCRC)")
+                print("Regenerated CRC: \(regeneratedCRC)")
+
+                if originalCRC == regeneratedCRC {
+                    print("✅ CRC Match - Perfect round-trip!")
+                } else {
+                    print("⚠️ CRC Mismatch - Check implementation")
+                }
             }
+
+            print("")
+            print("=== Expected Values ===")
+            print("Bank BIN: 970436 (Vietcombank)")
+            print("Account: 0011001800879")
+            print("Amount: 100000")
+            print("Purpose: nhan tien")
+
         } else {
+            print("❌ Parsing Failed!")
             showAlert("Failed to parse sample QR string")
         }
     }
@@ -669,7 +821,7 @@ extension ViewController: VietQRScannerDelegate {
             self.bankBinField.text = vietQR.bankBin
             self.accountField.text = vietQR.accountNumber
             self.amountField.text = vietQR.amount
-            self.descField.text = vietQR.description
+            self.descField.text = vietQR.purpose
             self.resultLabel.text = "✅ Scanned:\n\n" + vietQR.displayInfo
         }
     }
@@ -695,7 +847,7 @@ extension ViewController: UIImagePickerControllerDelegate, UINavigationControlle
         bankBinField.text = vietQR.bankBin
         accountField.text = vietQR.accountNumber
         amountField.text = vietQR.amount
-        descField.text = vietQR.description
+        descField.text = vietQR.purpose
         resultLabel.text = "✅ Parsed from image:\n\n" + vietQR.displayInfo
     }
 }
@@ -704,14 +856,23 @@ extension ViewController: UIImagePickerControllerDelegate, UINavigationControlle
 USAGE EXAMPLES:
 
 // 1. Parse from string
-let qrString = "00020101021238570010A00000072701270006970436..."
+let qrString = "00020101021238570010A00000072701270006970436011300110018008790208QRIBFTTA530370454061000005802VN62130809nhan tien6304D1EF"
 if let vietQR = VietQRService.shared.parse(from: qrString) {
-    print("Bank: \(vietQR.bankBin)")
-    print("Account: \(vietQR.accountNumber)")
+    print("Bank BIN: \(vietQR.bankBin)")              // 970436
+    print("Account Number: \(vietQR.accountNumber)")   // 0011001800879
+    print("Account Name: \(vietQR.accountName ?? "")")  // NGUYEN HOANG TUAN (if available in tag 59)
+    print("Amount: \(vietQR.amount ?? "")")            // 100000
+    print("Purpose: \(vietQR.purpose ?? "")")          // nhan tien
 }
 
 // 2. Generate string from object
-let vietQR = VietQR(bankBin: "970436", accountNumber: "123456", amount: "10000")
+let vietQR = VietQR(
+    bankBin: "970436",
+    accountNumber: "0011001800879",
+    accountName: "NGUYEN HOANG TUAN",
+    amount: "100000",
+    purpose: "nhan tien"
+)
 let qrString = VietQRService.shared.generate(from: vietQR)
 
 // 3. Generate QR image
