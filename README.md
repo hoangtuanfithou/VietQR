@@ -139,7 +139,7 @@ class MyViewController: UIViewController, BankQRScannerDelegate {
 }
 ```
 
-#### Scanner with Custom Overlay
+#### Scanner with Custom Overlay (UIView - Simple)
 
 ```swift
 // Customize overlay appearance
@@ -154,15 +154,36 @@ let scanner = VNBankQR.shared.createScanner(delegate: self, configuration: confi
 present(scanner, animated: true)
 ```
 
-#### Scanner with Completely Custom Overlay
+#### Scanner with Custom UIView Overlay
 
 ```swift
-// Create your own overlay view
+// Create your own overlay view (for simple static UI)
 let customOverlay = UIView()
-// Add your custom UI elements (labels, buttons, instructions, etc.)
-// The scan area will be automatically centered
+// Add your custom UI elements (labels, frames, instructions, etc.)
 
 let config = ScannerConfiguration(customOverlay: customOverlay)
+let scanner = VNBankQR.shared.createScanner(delegate: self, configuration: config)
+present(scanner, animated: true)
+```
+
+#### Scanner with Custom UIViewController Overlay (Recommended for Complex UI)
+
+```swift
+// Create a custom UIViewController for complex overlay UI
+class ScannerOverlayViewController: UIViewController {
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        // Add instruction labels
+        // Add flashlight toggle button
+        // Add manual entry button
+        // Handle user interactions
+        // Full view controller lifecycle support
+    }
+}
+
+// Use the custom overlay
+let overlayVC = ScannerOverlayViewController()
+let config = ScannerConfiguration(customOverlayViewController: overlayVC)
 let scanner = VNBankQR.shared.createScanner(delegate: self, configuration: config)
 present(scanner, animated: true)
 ```
@@ -170,8 +191,14 @@ present(scanner, animated: true)
 **Key Features:**
 - **Region of Interest**: Scanner automatically focuses on the square area for faster and more accurate scanning
 - **Default Overlay**: Built-in overlay with dimmed background and clear scanning area
-- **Custom Overlay**: Fully customizable - add your own instructions, branding, or UI elements
+- **UIView Overlay**: Lightweight option for simple static UI elements
+- **UIViewController Overlay**: Recommended for complex UI with buttons, forms, animations, and lifecycle management
 - **Configurable**: Adjust size, colors, and appearance to match your app's design
+
+**When to use each approach:**
+- **Default**: Quick integration, no customization needed
+- **UIView**: Simple overlays with static elements (labels, frames, branding)
+- **UIViewController**: Complex overlays with buttons, flashlight control, manual entry, animations, or navigation
 
 ## Repository Structure
 

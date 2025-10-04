@@ -13,7 +13,12 @@ import AVFoundation
 
 /// Configuration for scanner overlay and scanning area
 public struct ScannerConfiguration {
-    /// Custom overlay view (optional). If nil, default overlay will be used
+    /// Custom overlay as UIViewController (recommended for complex UI)
+    /// Takes priority over customOverlay if both are provided
+    public var customOverlayViewController: UIViewController?
+
+    /// Custom overlay as UIView (for simple overlays)
+    /// Used only if customOverlayViewController is nil
     public var customOverlay: UIView?
 
     /// Scanning area size (width and height will be equal for square)
@@ -24,15 +29,19 @@ public struct ScannerConfiguration {
     public var scanAreaCornerRadius: CGFloat
 
     /// Overlay background color (area outside scan square)
+    /// Only used for default overlay
     public var overlayColor: UIColor
 
     /// Scan area border color
+    /// Only used for default overlay
     public var scanAreaBorderColor: UIColor
 
     /// Scan area border width
+    /// Only used for default overlay
     public var scanAreaBorderWidth: CGFloat
 
     public init(
+        customOverlayViewController: UIViewController? = nil,
         customOverlay: UIView? = nil,
         scanAreaSize: CGFloat = 250,
         scanAreaCornerRadius: CGFloat = 12,
@@ -40,6 +49,7 @@ public struct ScannerConfiguration {
         scanAreaBorderColor: UIColor = .white,
         scanAreaBorderWidth: CGFloat = 2
     ) {
+        self.customOverlayViewController = customOverlayViewController
         self.customOverlay = customOverlay
         self.scanAreaSize = scanAreaSize
         self.scanAreaCornerRadius = scanAreaCornerRadius
@@ -64,12 +74,22 @@ public class BankQRScannerViewController: UIViewController {
     private var hasScanned = false
 
     private var overlayView: UIView?
+    private var overlayViewController: UIViewController?
     private var scanAreaView: UIView?
 
     public override func viewDidLoad() {
         super.viewDidLoad()
         setupCamera()
         setupUI()
+    }
+
+    deinit {
+        // Clean up child view controller if needed
+        if let overlayVC = overlayViewController {
+            overlayVC.willMove(toParent: nil)
+            overlayVC.view.removeFromSuperview()
+            overlayVC.removeFromParent()
+        }
     }
 
     private func setupCamera() {
@@ -121,12 +141,16 @@ public class BankQRScannerViewController: UIViewController {
     }
 
     private func setupOverlay() {
-        // Use custom overlay if provided, otherwise create default
-        if let customOverlay = configuration.customOverlay {
-            customOverlay.frame = view.bounds
-            view.addSubview(customOverlay)
-            overlayView = customOverlay
-        } else {
+        // Priority 1: Use custom UIViewController overlay (best for complex UI)
+        if let customOverlayVC = configuration.customOverlayViewController {
+            setupViewControllerOverlay(customOverlayVC)
+        }
+        // Priority 2: Use custom UIView overlay (for simple overlays)
+        else if let customOverlay = configuration.customOverlay {
+            setupViewOverlay(customOverlay)
+        }
+        // Priority 3: Use default overlay
+        else {
             createDefaultOverlay()
         }
 
@@ -134,6 +158,26 @@ public class BankQRScannerViewController: UIViewController {
         DispatchQueue.main.async { [weak self] in
             self?.updateScanAreaRegion()
         }
+    }
+
+    private func setupViewControllerOverlay(_ overlayVC: UIViewController) {
+        // Proper child view controller containment
+        addChild(overlayVC)
+        overlayVC.view.frame = view.bounds
+        overlayVC.view.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        view.addSubview(overlayVC.view)
+        overlayVC.didMove(toParent: self)
+
+        // Store reference for cleanup
+        overlayViewController = overlayVC
+        overlayView = overlayVC.view
+    }
+
+    private func setupViewOverlay(_ customOverlay: UIView) {
+        customOverlay.frame = view.bounds
+        customOverlay.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        view.addSubview(customOverlay)
+        overlayView = customOverlay
     }
 
     private func createDefaultOverlay() {
@@ -201,7 +245,8 @@ public class BankQRScannerViewController: UIViewController {
         overlayView?.frame = view.bounds
 
         // Recreate overlay with new bounds if using default
-        if configuration.customOverlay == nil {
+        // Don't recreate if using custom UIView or UIViewController
+        if configuration.customOverlayViewController == nil && configuration.customOverlay == nil {
             overlayView?.removeFromSuperview()
             createDefaultOverlay()
         }
