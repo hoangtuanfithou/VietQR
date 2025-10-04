@@ -1,0 +1,606 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		6E806BF92E90E70B00EB55FE /* VNBankQR in Frameworks */ = {isa = PBXBuildFile; productRef = 6E806BF82E90E70B00EB55FE /* VNBankQR */; };
+		6EC2B5FD2E90EA20000A7E51 /* VNBankQR in Frameworks */ = {isa = PBXBuildFile; productRef = 6EC2B5FC2E90EA20000A7E51 /* VNBankQR */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		6E806BD52E90E67400EB55FE /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 6E806A6B2E8C0EB200EB55FE /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 6E806BBE2E90E67200EB55FE;
+			remoteInfo = VNBankQRDemo;
+		};
+		6E806BDF2E90E67400EB55FE /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 6E806A6B2E8C0EB200EB55FE /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 6E806BBE2E90E67200EB55FE;
+			remoteInfo = VNBankQRDemo;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		6E806BBF2E90E67200EB55FE /* VNBankQRDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VNBankQRDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		6E806BD42E90E67400EB55FE /* VNBankQRDemoTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = VNBankQRDemoTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		6E806BDE2E90E67400EB55FE /* VNBankQRDemoUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = VNBankQRDemoUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		6E806BE62E90E67400EB55FE /* Exceptions for "VNBankQRDemo" folder in "VNBankQRDemo" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 6E806BBE2E90E67200EB55FE /* VNBankQRDemo */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		6E806BC02E90E67200EB55FE /* VNBankQRDemo */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				6E806BE62E90E67400EB55FE /* Exceptions for "VNBankQRDemo" folder in "VNBankQRDemo" target */,
+			);
+			path = VNBankQRDemo;
+			sourceTree = "<group>";
+		};
+		6E806BD72E90E67400EB55FE /* VNBankQRDemoTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = VNBankQRDemoTests;
+			sourceTree = "<group>";
+		};
+		6E806BE12E90E67400EB55FE /* VNBankQRDemoUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = VNBankQRDemoUITests;
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		6E806BBC2E90E67200EB55FE /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				6E806BF92E90E70B00EB55FE /* VNBankQR in Frameworks */,
+				6EC2B5FD2E90EA20000A7E51 /* VNBankQR in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		6E806BD12E90E67400EB55FE /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		6E806BDB2E90E67400EB55FE /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		6E806A6A2E8C0EB200EB55FE = {
+			isa = PBXGroup;
+			children = (
+				6E806BC02E90E67200EB55FE /* VNBankQRDemo */,
+				6E806BD72E90E67400EB55FE /* VNBankQRDemoTests */,
+				6E806BE12E90E67400EB55FE /* VNBankQRDemoUITests */,
+				6E806A742E8C0EB200EB55FE /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		6E806A742E8C0EB200EB55FE /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				6E806BBF2E90E67200EB55FE /* VNBankQRDemo.app */,
+				6E806BD42E90E67400EB55FE /* VNBankQRDemoTests.xctest */,
+				6E806BDE2E90E67400EB55FE /* VNBankQRDemoUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		6E806BBE2E90E67200EB55FE /* VNBankQRDemo */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 6E806BE72E90E67400EB55FE /* Build configuration list for PBXNativeTarget "VNBankQRDemo" */;
+			buildPhases = (
+				6E806BBB2E90E67200EB55FE /* Sources */,
+				6E806BBC2E90E67200EB55FE /* Frameworks */,
+				6E806BBD2E90E67200EB55FE /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				6E806BC02E90E67200EB55FE /* VNBankQRDemo */,
+			);
+			name = VNBankQRDemo;
+			packageProductDependencies = (
+				6E806BF82E90E70B00EB55FE /* VNBankQR */,
+				6EC2B5FC2E90EA20000A7E51 /* VNBankQR */,
+			);
+			productName = VNBankQRDemo;
+			productReference = 6E806BBF2E90E67200EB55FE /* VNBankQRDemo.app */;
+			productType = "com.apple.product-type.application";
+		};
+		6E806BD32E90E67400EB55FE /* VNBankQRDemoTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 6E806BEA2E90E67400EB55FE /* Build configuration list for PBXNativeTarget "VNBankQRDemoTests" */;
+			buildPhases = (
+				6E806BD02E90E67400EB55FE /* Sources */,
+				6E806BD12E90E67400EB55FE /* Frameworks */,
+				6E806BD22E90E67400EB55FE /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				6E806BD62E90E67400EB55FE /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				6E806BD72E90E67400EB55FE /* VNBankQRDemoTests */,
+			);
+			name = VNBankQRDemoTests;
+			packageProductDependencies = (
+			);
+			productName = VNBankQRDemoTests;
+			productReference = 6E806BD42E90E67400EB55FE /* VNBankQRDemoTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		6E806BDD2E90E67400EB55FE /* VNBankQRDemoUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 6E806BED2E90E67400EB55FE /* Build configuration list for PBXNativeTarget "VNBankQRDemoUITests" */;
+			buildPhases = (
+				6E806BDA2E90E67400EB55FE /* Sources */,
+				6E806BDB2E90E67400EB55FE /* Frameworks */,
+				6E806BDC2E90E67400EB55FE /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				6E806BE02E90E67400EB55FE /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				6E806BE12E90E67400EB55FE /* VNBankQRDemoUITests */,
+			);
+			name = VNBankQRDemoUITests;
+			packageProductDependencies = (
+			);
+			productName = VNBankQRDemoUITests;
+			productReference = 6E806BDE2E90E67400EB55FE /* VNBankQRDemoUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		6E806A6B2E8C0EB200EB55FE /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1640;
+				LastUpgradeCheck = 1640;
+				TargetAttributes = {
+					6E806BBE2E90E67200EB55FE = {
+						CreatedOnToolsVersion = 16.4;
+					};
+					6E806BD32E90E67400EB55FE = {
+						CreatedOnToolsVersion = 16.4;
+						TestTargetID = 6E806BBE2E90E67200EB55FE;
+					};
+					6E806BDD2E90E67400EB55FE = {
+						CreatedOnToolsVersion = 16.4;
+						TestTargetID = 6E806BBE2E90E67200EB55FE;
+					};
+				};
+			};
+			buildConfigurationList = 6E806A6E2E8C0EB200EB55FE /* Build configuration list for PBXProject "VNBankQRDemo" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 6E806A6A2E8C0EB200EB55FE;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				6EC2B5FB2E90EA20000A7E51 /* XCLocalSwiftPackageReference "../../VietQR" */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 6E806A742E8C0EB200EB55FE /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				6E806BBE2E90E67200EB55FE /* VNBankQRDemo */,
+				6E806BD32E90E67400EB55FE /* VNBankQRDemoTests */,
+				6E806BDD2E90E67400EB55FE /* VNBankQRDemoUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		6E806BBD2E90E67200EB55FE /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		6E806BD22E90E67400EB55FE /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		6E806BDC2E90E67400EB55FE /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		6E806BBB2E90E67200EB55FE /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		6E806BD02E90E67400EB55FE /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		6E806BDA2E90E67400EB55FE /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		6E806BD62E90E67400EB55FE /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 6E806BBE2E90E67200EB55FE /* VNBankQRDemo */;
+			targetProxy = 6E806BD52E90E67400EB55FE /* PBXContainerItemProxy */;
+		};
+		6E806BE02E90E67400EB55FE /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 6E806BBE2E90E67200EB55FE /* VNBankQRDemo */;
+			targetProxy = 6E806BDF2E90E67400EB55FE /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		6E806A9F2E8C0EB300EB55FE /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = 7D2KWETKFP;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.5;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		6E806AA02E8C0EB300EB55FE /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = 7D2KWETKFP;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.5;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		6E806BE82E90E67400EB55FE /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 7D2KWETKFP;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = VNBankQRDemo/Info.plist;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+				INFOPLIST_KEY_UIMainStoryboardFile = Main;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = nht.VNBankQRDemo;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		6E806BE92E90E67400EB55FE /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 7D2KWETKFP;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = VNBankQRDemo/Info.plist;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+				INFOPLIST_KEY_UIMainStoryboardFile = Main;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = nht.VNBankQRDemo;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		6E806BEB2E90E67400EB55FE /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 7D2KWETKFP;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.5;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = nht.VNBankQRDemoTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/VNBankQRDemo.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/VNBankQRDemo";
+			};
+			name = Debug;
+		};
+		6E806BEC2E90E67400EB55FE /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 7D2KWETKFP;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.5;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = nht.VNBankQRDemoTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/VNBankQRDemo.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/VNBankQRDemo";
+			};
+			name = Release;
+		};
+		6E806BEE2E90E67400EB55FE /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 7D2KWETKFP;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = nht.VNBankQRDemoUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = VNBankQRDemo;
+			};
+			name = Debug;
+		};
+		6E806BEF2E90E67400EB55FE /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 7D2KWETKFP;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = nht.VNBankQRDemoUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = VNBankQRDemo;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		6E806A6E2E8C0EB200EB55FE /* Build configuration list for PBXProject "VNBankQRDemo" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				6E806A9F2E8C0EB300EB55FE /* Debug */,
+				6E806AA02E8C0EB300EB55FE /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		6E806BE72E90E67400EB55FE /* Build configuration list for PBXNativeTarget "VNBankQRDemo" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				6E806BE82E90E67400EB55FE /* Debug */,
+				6E806BE92E90E67400EB55FE /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		6E806BEA2E90E67400EB55FE /* Build configuration list for PBXNativeTarget "VNBankQRDemoTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				6E806BEB2E90E67400EB55FE /* Debug */,
+				6E806BEC2E90E67400EB55FE /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		6E806BED2E90E67400EB55FE /* Build configuration list for PBXNativeTarget "VNBankQRDemoUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				6E806BEE2E90E67400EB55FE /* Debug */,
+				6E806BEF2E90E67400EB55FE /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		6EC2B5FB2E90EA20000A7E51 /* XCLocalSwiftPackageReference "../../VietQR" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../../VietQR;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		6E806BF82E90E70B00EB55FE /* VNBankQR */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = VNBankQR;
+		};
+		6EC2B5FC2E90EA20000A7E51 /* VNBankQR */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = VNBankQR;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 6E806A6B2E8C0EB200EB55FE /* Project object */;
+}
