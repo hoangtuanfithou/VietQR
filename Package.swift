@@ -24,11 +24,5 @@ let package = Package(
             dependencies: ["VNBankQR"],
             path: "Tests/VNBankQRTests"
         ),
-    ],
-    swiftLanguageVersions: [.v5],
-    exclude: [
-        "Demo",
-        "Documentation",
-        "VietQR"
     ]
 )
