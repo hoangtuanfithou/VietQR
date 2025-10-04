@@ -154,8 +154,101 @@ class ViewController: UIViewController {
     }
 
     @objc private func scanTapped() {
-        let scanner = VNBankQR.shared.createScanner(delegate: self)
+        // Example 1: Use default scanner with default overlay
+        // let scanner = VNBankQR.shared.createScanner(delegate: self)
+
+        // Example 2: Customize scanner overlay appearance
+        let config = ScannerConfiguration(
+            scanAreaSize: 280,
+            scanAreaCornerRadius: 16,
+            overlayColor: UIColor.black.withAlphaComponent(0.6),
+            scanAreaBorderColor: .systemGreen,
+            scanAreaBorderWidth: 3
+        )
+        let scanner = VNBankQR.shared.createScanner(delegate: self, configuration: config)
+
+        // Example 3: Use completely custom overlay (uncomment to try)
+        // let customOverlay = createCustomOverlay()
+        // let customConfig = ScannerConfiguration(customOverlay: customOverlay)
+        // let scanner = VNBankQR.shared.createScanner(delegate: self, configuration: customConfig)
+
         present(scanner, animated: true)
+    }
+
+    // Example: Create custom overlay view with instructions
+    private func createCustomOverlay() -> UIView {
+        let overlay = UIView()
+        overlay.backgroundColor = .clear
+
+        // Add instruction label at top
+        let instructionLabel = UILabel()
+        instructionLabel.text = "Align QR code within the frame"
+        instructionLabel.textColor = .white
+        instructionLabel.font = .systemFont(ofSize: 16, weight: .medium)
+        instructionLabel.textAlignment = .center
+        instructionLabel.translatesAutoresizingMaskIntoConstraints = false
+        overlay.addSubview(instructionLabel)
+
+        NSLayoutConstraint.activate([
+            instructionLabel.topAnchor.constraint(equalTo: overlay.safeAreaLayoutGuide.topAnchor, constant: 40),
+            instructionLabel.centerXAnchor.constraint(equalTo: overlay.centerXAnchor),
+            instructionLabel.leadingAnchor.constraint(equalTo: overlay.leadingAnchor, constant: 20),
+            instructionLabel.trailingAnchor.constraint(equalTo: overlay.trailingAnchor, constant: -20)
+        ])
+
+        // Add scan frame with corners
+        let scanSize: CGFloat = 280
+        let scanFrame = UIView()
+        scanFrame.backgroundColor = .clear
+        scanFrame.translatesAutoresizingMaskIntoConstraints = false
+        overlay.addSubview(scanFrame)
+
+        NSLayoutConstraint.activate([
+            scanFrame.centerXAnchor.constraint(equalTo: overlay.centerXAnchor),
+            scanFrame.centerYAnchor.constraint(equalTo: overlay.centerYAnchor),
+            scanFrame.widthAnchor.constraint(equalToConstant: scanSize),
+            scanFrame.heightAnchor.constraint(equalToConstant: scanSize)
+        ])
+
+        // Add corner indicators
+        let cornerLength: CGFloat = 30
+        let cornerWidth: CGFloat = 4
+        let corners = [
+            (CGPoint(x: 0, y: 0), [true, false, false, true]),  // Top-left
+            (CGPoint(x: scanSize - cornerLength, y: 0), [true, true, false, false]),  // Top-right
+            (CGPoint(x: 0, y: scanSize - cornerLength), [false, false, true, true]),  // Bottom-left
+            (CGPoint(x: scanSize - cornerLength, y: scanSize - cornerLength), [false, true, true, false])  // Bottom-right
+        ]
+
+        for (position, sides) in corners {
+            let corner = UIView(frame: CGRect(x: position.x, y: position.y, width: cornerLength, height: cornerLength))
+            corner.backgroundColor = .clear
+
+            if sides[0] { // Top
+                let top = UIView(frame: CGRect(x: 0, y: 0, width: cornerLength, height: cornerWidth))
+                top.backgroundColor = .systemGreen
+                corner.addSubview(top)
+            }
+            if sides[1] { // Right
+                let right = UIView(frame: CGRect(x: cornerLength - cornerWidth, y: 0, width: cornerWidth, height: cornerLength))
+                right.backgroundColor = .systemGreen
+                corner.addSubview(right)
+            }
+            if sides[2] { // Bottom
+                let bottom = UIView(frame: CGRect(x: 0, y: cornerLength - cornerWidth, width: cornerLength, height: cornerWidth))
+                bottom.backgroundColor = .systemGreen
+                corner.addSubview(bottom)
+            }
+            if sides[3] { // Left
+                let left = UIView(frame: CGRect(x: 0, y: 0, width: cornerWidth, height: cornerLength))
+                left.backgroundColor = .systemGreen
+                corner.addSubview(left)
+            }
+
+            scanFrame.addSubview(corner)
+        }
+
+        return overlay
     }
 
     @objc private func selectTapped() {

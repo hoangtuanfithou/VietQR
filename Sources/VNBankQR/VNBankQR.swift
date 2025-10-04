@@ -21,9 +21,18 @@ public final class VNBankQR {
 
     /// Create a bank QR scanner view controller
     /// Supports all Vietnamese bank QR codes
-    public func createScanner(delegate: BankQRScannerDelegate) -> BankQRScannerViewController {
+    /// - Parameters:
+    ///   - delegate: Scanner delegate to receive scan results
+    ///   - configuration: Optional scanner configuration (overlay, scan area). Default configuration will be used if nil
+    public func createScanner(
+        delegate: BankQRScannerDelegate,
+        configuration: ScannerConfiguration? = nil
+    ) -> BankQRScannerViewController {
         let scanner = BankQRScannerViewController()
         scanner.delegate = delegate
+        if let config = configuration {
+            scanner.configuration = config
+        }
         return scanner
     }
 

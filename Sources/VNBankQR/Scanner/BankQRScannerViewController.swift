@@ -9,13 +9,62 @@
 import UIKit
 import AVFoundation
 
+// MARK: - Scanner Configuration
+
+/// Configuration for scanner overlay and scanning area
+public struct ScannerConfiguration {
+    /// Custom overlay view (optional). If nil, default overlay will be used
+    public var customOverlay: UIView?
+
+    /// Scanning area size (width and height will be equal for square)
+    /// Default is 250x250
+    public var scanAreaSize: CGFloat
+
+    /// Corner radius for the scan area
+    public var scanAreaCornerRadius: CGFloat
+
+    /// Overlay background color (area outside scan square)
+    public var overlayColor: UIColor
+
+    /// Scan area border color
+    public var scanAreaBorderColor: UIColor
+
+    /// Scan area border width
+    public var scanAreaBorderWidth: CGFloat
+
+    public init(
+        customOverlay: UIView? = nil,
+        scanAreaSize: CGFloat = 250,
+        scanAreaCornerRadius: CGFloat = 12,
+        overlayColor: UIColor = UIColor.black.withAlphaComponent(0.5),
+        scanAreaBorderColor: UIColor = .white,
+        scanAreaBorderWidth: CGFloat = 2
+    ) {
+        self.customOverlay = customOverlay
+        self.scanAreaSize = scanAreaSize
+        self.scanAreaCornerRadius = scanAreaCornerRadius
+        self.overlayColor = overlayColor
+        self.scanAreaBorderColor = scanAreaBorderColor
+        self.scanAreaBorderWidth = scanAreaBorderWidth
+    }
+}
+
+// MARK: - Universal Bank QR Scanner
+
 /// Universal Bank QR scanner that can detect and parse any registered Vietnamese bank QR code
 public class BankQRScannerViewController: UIViewController {
     public weak var delegate: BankQRScannerDelegate?
 
+    /// Scanner configuration (overlay and scan area)
+    public var configuration: ScannerConfiguration = ScannerConfiguration()
+
     private var captureSession: AVCaptureSession?
     private var previewLayer: AVCaptureVideoPreviewLayer?
+    private var metadataOutput: AVCaptureMetadataOutput?
     private var hasScanned = false
+
+    private var overlayView: UIView?
+    private var scanAreaView: UIView?
 
     public override func viewDidLoad() {
         super.viewDidLoad()
@@ -40,6 +89,7 @@ public class BankQRScannerViewController: UIViewController {
             output.metadataObjectTypes = [.qr]
 
             self.captureSession = session
+            self.metadataOutput = output
         } catch {
             delegate?.didFailScanning(error: .cameraNotAvailable)
         }
@@ -51,11 +101,15 @@ public class BankQRScannerViewController: UIViewController {
         view.backgroundColor = .black
         title = "Scan QR Code"
 
+        // Setup camera preview
         let preview = AVCaptureVideoPreviewLayer(session: session)
         preview.frame = view.bounds
         preview.videoGravity = .resizeAspectFill
         view.layer.addSublayer(preview)
         previewLayer = preview
+
+        // Setup overlay
+        setupOverlay()
 
         navigationItem.rightBarButtonItem = UIBarButtonItem(
             barButtonSystemItem: .cancel,
@@ -66,6 +120,76 @@ public class BankQRScannerViewController: UIViewController {
         session.startRunning()
     }
 
+    private func setupOverlay() {
+        // Use custom overlay if provided, otherwise create default
+        if let customOverlay = configuration.customOverlay {
+            customOverlay.frame = view.bounds
+            view.addSubview(customOverlay)
+            overlayView = customOverlay
+        } else {
+            createDefaultOverlay()
+        }
+
+        // Update scan area region of interest after layout
+        DispatchQueue.main.async { [weak self] in
+            self?.updateScanAreaRegion()
+        }
+    }
+
+    private func createDefaultOverlay() {
+        let overlay = UIView(frame: view.bounds)
+        overlay.backgroundColor = .clear
+        view.addSubview(overlay)
+        overlayView = overlay
+
+        // Create dimmed background with clear center
+        let maskLayer = CAShapeLayer()
+        let path = UIBezierPath(rect: overlay.bounds)
+
+        // Calculate scan area position (centered)
+        let scanSize = configuration.scanAreaSize
+        let scanX = (overlay.bounds.width - scanSize) / 2
+        let scanY = (overlay.bounds.height - scanSize) / 2
+        let scanRect = CGRect(x: scanX, y: scanY, width: scanSize, height: scanSize)
+
+        // Cut out the scan area
+        let scanPath = UIBezierPath(roundedRect: scanRect, cornerRadius: configuration.scanAreaCornerRadius)
+        path.append(scanPath)
+        path.usesEvenOddFillRule = true
+
+        maskLayer.path = path.cgPath
+        maskLayer.fillRule = .evenOdd
+        maskLayer.fillColor = configuration.overlayColor.cgColor
+        overlay.layer.addSublayer(maskLayer)
+
+        // Create scan area border
+        let borderView = UIView(frame: scanRect)
+        borderView.layer.cornerRadius = configuration.scanAreaCornerRadius
+        borderView.layer.borderColor = configuration.scanAreaBorderColor.cgColor
+        borderView.layer.borderWidth = configuration.scanAreaBorderWidth
+        borderView.backgroundColor = .clear
+        overlay.addSubview(borderView)
+        scanAreaView = borderView
+    }
+
+    private func updateScanAreaRegion() {
+        guard let previewLayer = previewLayer,
+              let metadataOutput = metadataOutput else { return }
+
+        // Calculate scan area in view coordinates
+        let scanSize = configuration.scanAreaSize
+        let scanX = (view.bounds.width - scanSize) / 2
+        let scanY = (view.bounds.height - scanSize) / 2
+        let scanRect = CGRect(x: scanX, y: scanY, width: scanSize, height: scanSize)
+
+        // Convert to normalized coordinates (0-1) relative to preview layer
+        // AVFoundation uses (0,0) at top-left, (1,1) at bottom-right
+        let rectOfInterest = previewLayer.metadataOutputRectConverted(fromLayerRect: scanRect)
+
+        // Set the region of interest for faster and more accurate scanning
+        metadataOutput.rectOfInterest = rectOfInterest
+    }
+
     @objc private func cancelTapped() {
         captureSession?.stopRunning()
         dismiss(animated: true)
@@ -74,6 +198,15 @@ public class BankQRScannerViewController: UIViewController {
     public override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         previewLayer?.frame = view.bounds
+        overlayView?.frame = view.bounds
+
+        // Recreate overlay with new bounds if using default
+        if configuration.customOverlay == nil {
+            overlayView?.removeFromSuperview()
+            createDefaultOverlay()
+        }
+
+        updateScanAreaRegion()
     }
 }
 

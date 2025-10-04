@@ -116,9 +116,12 @@ let qrString = VNBankQR.shared.generateVietQRString(from: vietQR)
 
 ### 4. Scan QR Code
 
+#### Basic Scanner
+
 ```swift
 class MyViewController: UIViewController, BankQRScannerDelegate {
     func showScanner() {
+        // Use default scanner
         let scanner = VNBankQR.shared.createScanner(delegate: self)
         present(scanner, animated: true)
     }
@@ -135,6 +138,40 @@ class MyViewController: UIViewController, BankQRScannerDelegate {
     }
 }
 ```
+
+#### Scanner with Custom Overlay
+
+```swift
+// Customize overlay appearance
+let config = ScannerConfiguration(
+    scanAreaSize: 280,              // Square size for scanning area
+    scanAreaCornerRadius: 16,       // Corner radius
+    overlayColor: UIColor.black.withAlphaComponent(0.6),  // Dimmed background
+    scanAreaBorderColor: .systemGreen,  // Border color
+    scanAreaBorderWidth: 3          // Border width
+)
+let scanner = VNBankQR.shared.createScanner(delegate: self, configuration: config)
+present(scanner, animated: true)
+```
+
+#### Scanner with Completely Custom Overlay
+
+```swift
+// Create your own overlay view
+let customOverlay = UIView()
+// Add your custom UI elements (labels, buttons, instructions, etc.)
+// The scan area will be automatically centered
+
+let config = ScannerConfiguration(customOverlay: customOverlay)
+let scanner = VNBankQR.shared.createScanner(delegate: self, configuration: config)
+present(scanner, animated: true)
+```
+
+**Key Features:**
+- **Region of Interest**: Scanner automatically focuses on the square area for faster and more accurate scanning
+- **Default Overlay**: Built-in overlay with dimmed background and clear scanning area
+- **Custom Overlay**: Fully customizable - add your own instructions, branding, or UI elements
+- **Configurable**: Adjust size, colors, and appearance to match your app's design
 
 ## Repository Structure
 
@@ -208,7 +245,10 @@ VNBankQR/
 
 ```swift
 // Scanner
-func createScanner(delegate: BankQRScannerDelegate) -> BankQRScannerViewController
+func createScanner(
+    delegate: BankQRScannerDelegate,
+    configuration: ScannerConfiguration?
+) -> BankQRScannerViewController
 
 // Parser
 func parse(qrString: String) -> (any BankQRProtocol)?
