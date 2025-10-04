@@ -170,12 +170,21 @@ present(scanner, animated: true)
 
 ```swift
 // Create a custom UIViewController for complex overlay UI
-class ScannerOverlayViewController: UIViewController {
+// Conform to BankQRScannerOverlay protocol to provide scan area
+class ScannerOverlayViewController: UIViewController, BankQRScannerOverlay {
+    private let scanFrameView = UIView()
+
+    // Provide scan area to the scanner for focused QR detection
+    var scanAreaRect: CGRect? {
+        return scanFrameView.frame  // Return the frame of your scan area
+    }
+
     override func viewDidLoad() {
         super.viewDidLoad()
         // Add instruction labels
         // Add flashlight toggle button
         // Add manual entry button
+        // Setup scanFrameView with your desired size and position
         // Handle user interactions
         // Full view controller lifecycle support
     }
@@ -187,6 +196,25 @@ let config = ScannerConfiguration(customOverlayViewController: overlayVC)
 let scanner = VNBankQR.shared.createScanner(delegate: self, configuration: config)
 present(scanner, animated: true)
 ```
+
+#### BankQRScannerOverlay Protocol
+
+Custom overlays (UIView or UIViewController) can conform to this protocol to provide the scan area:
+
+```swift
+public protocol BankQRScannerOverlay {
+    /// The frame of the scanning area in the overlay's coordinate system
+    /// This will be converted to AVFoundation's rectOfInterest
+    /// Return nil to use the full screen as scanning area
+    var scanAreaRect: CGRect? { get }
+}
+```
+
+**How it works:**
+1. Scanner checks if your custom overlay conforms to `BankQRScannerOverlay`
+2. If yes, it calls `scanAreaRect` to get the scan area
+3. Converts the rect to AVFoundation's `rectOfInterest` for focused scanning
+4. If no protocol conformance, uses the configuration's `scanAreaSize`
 
 **Key Features:**
 - **Region of Interest**: Scanner automatically focuses on the square area for faster and more accurate scanning

@@ -9,6 +9,17 @@
 import UIKit
 import AVFoundation
 
+// MARK: - Scanner Overlay Protocol
+
+/// Protocol for custom scanner overlays to provide scan area information
+/// Both UIView and UIViewController overlays can conform to this protocol
+public protocol BankQRScannerOverlay {
+    /// The frame of the scanning area in the overlay's coordinate system
+    /// This will be converted to AVFoundation's rectOfInterest
+    /// Return nil to use the full screen as scanning area
+    var scanAreaRect: CGRect? { get }
+}
+
 // MARK: - Scanner Configuration
 
 /// Configuration for scanner overlay and scanning area
@@ -220,11 +231,8 @@ public class BankQRScannerViewController: UIViewController {
         guard let previewLayer = previewLayer,
               let metadataOutput = metadataOutput else { return }
 
-        // Calculate scan area in view coordinates
-        let scanSize = configuration.scanAreaSize
-        let scanX = (view.bounds.width - scanSize) / 2
-        let scanY = (view.bounds.height - scanSize) / 2
-        let scanRect = CGRect(x: scanX, y: scanY, width: scanSize, height: scanSize)
+        // Get scan area from overlay (if it conforms to protocol)
+        let scanRect = getScanAreaFromOverlay()
 
         // Convert to normalized coordinates (0-1) relative to preview layer
         // AVFoundation uses (0,0) at top-left, (1,1) at bottom-right
@@ -232,6 +240,26 @@ public class BankQRScannerViewController: UIViewController {
 
         // Set the region of interest for faster and more accurate scanning
         metadataOutput.rectOfInterest = rectOfInterest
+    }
+
+    private func getScanAreaFromOverlay() -> CGRect {
+        // Priority 1: Get from UIViewController overlay (if it conforms to protocol)
+        if let overlayVC = overlayViewController as? BankQRScannerOverlay,
+           let scanArea = overlayVC.scanAreaRect {
+            return scanArea
+        }
+
+        // Priority 2: Get from UIView overlay (if it conforms to protocol)
+        if let customOverlay = overlayView as? BankQRScannerOverlay,
+           let scanArea = customOverlay.scanAreaRect {
+            return scanArea
+        }
+
+        // Priority 3: Calculate default scan area from configuration
+        let scanSize = configuration.scanAreaSize
+        let scanX = (view.bounds.width - scanSize) / 2
+        let scanY = (view.bounds.height - scanSize) / 2
+        return CGRect(x: scanX, y: scanY, width: scanSize, height: scanSize)
     }
 
     @objc private func cancelTapped() {

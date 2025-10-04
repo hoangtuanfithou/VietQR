@@ -394,13 +394,25 @@ extension ViewController: UIImagePickerControllerDelegate, UINavigationControlle
 /// - Toggle for flashlight
 /// - Manual entry button
 /// - Full view controller lifecycle
-class ScannerOverlayViewController: UIViewController {
+/// - Conforms to BankQRScannerOverlay protocol to provide scan area
+class ScannerOverlayViewController: UIViewController, BankQRScannerOverlay {
 
     private let instructionLabel = UILabel()
     private let scanFrameView = UIView()
     private let flashlightButton = UIButton(type: .system)
     private let manualEntryButton = UIButton(type: .system)
     private var isFlashlightOn = false
+
+    // MARK: - BankQRScannerOverlay Protocol
+
+    /// Provide the scan area rectangle to the scanner
+    /// This tells AVFoundation where to focus QR detection
+    var scanAreaRect: CGRect? {
+        // Return the frame of the scan area in the view's coordinate system
+        // The scanner will convert this to AVFoundation's rectOfInterest
+        guard scanFrameView.superview != nil else { return nil }
+        return scanFrameView.frame
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
