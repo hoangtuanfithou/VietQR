@@ -24,7 +24,7 @@ public final class VNBankQR {
     /// - Parameters:
     ///   - delegate: Scanner delegate to receive scan results
     ///   - configuration: Optional scanner configuration (overlay, scan area). Default configuration will be used if nil
-    public func createScanner(
+    public func didScanBankQR(
         delegate: BankQRScannerDelegate,
         configuration: ScannerConfiguration? = nil
     ) -> BankQRScannerViewController {
