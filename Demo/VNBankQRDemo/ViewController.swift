@@ -125,9 +125,9 @@ class ViewController: UIViewController {
 
     private func setupDemo() {
         bankBinField.text = "970436"
-        accountField.text = "113001180087902"
+        accountField.text = "0011001800879"
         amountField.text = "10000"
-        descField.text = "QRIBFTTA"
+        descField.text = "transfer money"
     }
 
     @objc private func generateTapped() {

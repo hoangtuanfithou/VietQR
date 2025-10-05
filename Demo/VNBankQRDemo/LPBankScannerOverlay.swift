@@ -40,7 +40,6 @@ class LPBankScannerOverlay: UIViewController, BankQRScannerOverlay {
     private let logoLabel = UILabel()
     private let instructionLabel = UILabel()
 
-    private let scanFrameView = UIView()
     private let scanFrameSize: CGFloat = 320
 
     private let paymentLogosStack = UIStackView()
@@ -56,8 +55,10 @@ class LPBankScannerOverlay: UIViewController, BankQRScannerOverlay {
     /// Provide the scan area rectangle to the scanner
     /// This tells AVFoundation where to focus QR detection
     var scanAreaRect: CGRect? {
-        guard scanFrameView.superview != nil else { return nil }
-        return scanFrameView.frame
+        // Calculate the exact scan area position
+        let scanX = (view.bounds.width - scanFrameSize) / 2
+        let scanY = (view.bounds.height - scanFrameSize) / 2 - 20
+        return CGRect(x: scanX, y: scanY, width: scanFrameSize, height: scanFrameSize)
     }
 
     // MARK: - Lifecycle
@@ -70,6 +71,9 @@ class LPBankScannerOverlay: UIViewController, BankQRScannerOverlay {
     private func setupUI() {
         view.backgroundColor = .clear
 
+        // Create dimmed overlay with transparent hole for scan area
+        setupDimmedOverlay()
+
         setupBackButton()
         setupFlashlightButton()
         setupLogo()
@@ -77,6 +81,33 @@ class LPBankScannerOverlay: UIViewController, BankQRScannerOverlay {
         setupScanFrame()
         setupPaymentLogos()
         setupBottomActions()
+    }
+
+    private func setupDimmedOverlay() {
+        // Create a semi-transparent black overlay with a transparent hole in the center
+        let overlayView = UIView(frame: view.bounds)
+        overlayView.backgroundColor = .clear
+        overlayView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        overlayView.isUserInteractionEnabled = false
+        view.addSubview(overlayView)
+
+        // Calculate scan area position (centered)
+        let scanX = (view.bounds.width - scanFrameSize) / 2
+        let scanY = (view.bounds.height - scanFrameSize) / 2 - 20
+        let scanRect = CGRect(x: scanX, y: scanY, width: scanFrameSize, height: scanFrameSize)
+
+        // Create mask with hole
+        let maskLayer = CAShapeLayer()
+        let path = UIBezierPath(rect: overlayView.bounds)
+        let holePath = UIBezierPath(roundedRect: scanRect, cornerRadius: 16)
+        path.append(holePath)
+        path.usesEvenOddFillRule = true
+
+        maskLayer.path = path.cgPath
+        maskLayer.fillRule = .evenOdd
+        maskLayer.fillColor = UIColor.black.withAlphaComponent(0.85).cgColor
+
+        overlayView.layer.addSublayer(maskLayer)
     }
 
     // MARK: - Setup Methods
@@ -151,53 +182,72 @@ class LPBankScannerOverlay: UIViewController, BankQRScannerOverlay {
     }
 
     private func setupScanFrame() {
-        scanFrameView.backgroundColor = UIColor.gray.withAlphaComponent(0.3)
-        scanFrameView.layer.cornerRadius = 16
-        scanFrameView.layer.borderColor = UIColor.white.withAlphaComponent(0.3).cgColor
-        scanFrameView.layer.borderWidth = 2
-        scanFrameView.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(scanFrameView)
-
-        NSLayoutConstraint.activate([
-            scanFrameView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            scanFrameView.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: -20),
-            scanFrameView.widthAnchor.constraint(equalToConstant: scanFrameSize),
-            scanFrameView.heightAnchor.constraint(equalToConstant: scanFrameSize)
-        ])
-
-        // Add corner brackets (L-shaped indicators)
-        addCornerBrackets(to: scanFrameView)
+        // Add corner brackets directly to main view at the exact hole position
+        addCornerBrackets()
     }
 
-    private func addCornerBrackets(to frameView: UIView) {
-        let bracketLength: CGFloat = 40
-        let bracketWidth: CGFloat = 4
-        let bracketColor = UIColor.white
-        let offset: CGFloat = -2
+    private func addCornerBrackets() {
+        let cornerSize: CGFloat = 40  // Size of corner indicator image
 
-        let corners: [(position: CGPoint, rotation: CGFloat)] = [
-            (CGPoint(x: offset, y: offset), 0),                                    // Top-left
-            (CGPoint(x: scanFrameSize - bracketLength - offset, y: offset), .pi / 2),   // Top-right
-            (CGPoint(x: offset, y: scanFrameSize - bracketLength - offset), -.pi / 2),  // Bottom-left
-            (CGPoint(x: scanFrameSize - bracketLength - offset, y: scanFrameSize - bracketLength - offset), .pi) // Bottom-right
-        ]
+        // Calculate the exact position of the hole (same as in setupDimmedOverlay)
+        let scanX = (view.bounds.width - scanFrameSize) / 2
+        let scanY = (view.bounds.height - scanFrameSize) / 2 - 20
 
-        for (position, rotation) in corners {
-            let bracket = UIView(frame: CGRect(x: position.x, y: position.y, width: bracketLength, height: bracketLength))
-            bracket.backgroundColor = .clear
+        // Create separate images for each corner (no rotation needed)
+        let topLeftImage = createCornerBracketPlaceholder(size: cornerSize, corner: .topLeft)
+        let topRightImage = createCornerBracketPlaceholder(size: cornerSize, corner: .topRight)
+        let bottomLeftImage = createCornerBracketPlaceholder(size: cornerSize, corner: .bottomLeft)
+        let bottomRightImage = createCornerBracketPlaceholder(size: cornerSize, corner: .bottomRight)
 
-            // Create L-shape using two rectangles
-            let horizontal = UIView(frame: CGRect(x: 0, y: 0, width: bracketLength, height: bracketWidth))
-            horizontal.backgroundColor = bracketColor
-            bracket.addSubview(horizontal)
+        // Top-left corner - positioned at hole's top-left
+        let topLeft = UIImageView(image: topLeftImage)
+        topLeft.frame = CGRect(x: scanX, y: scanY, width: cornerSize, height: cornerSize)
+        view.addSubview(topLeft)
 
-            let vertical = UIView(frame: CGRect(x: 0, y: 0, width: bracketWidth, height: bracketLength))
-            vertical.backgroundColor = bracketColor
-            bracket.addSubview(vertical)
+        // Top-right corner - positioned at hole's top-right
+        let topRight = UIImageView(image: topRightImage)
+        topRight.frame = CGRect(x: scanX + scanFrameSize - cornerSize, y: scanY, width: cornerSize, height: cornerSize)
+        view.addSubview(topRight)
 
-            bracket.transform = CGAffineTransform(rotationAngle: rotation)
-            frameView.addSubview(bracket)
+        // Bottom-left corner - positioned at hole's bottom-left
+        let bottomLeft = UIImageView(image: bottomLeftImage)
+        bottomLeft.frame = CGRect(x: scanX, y: scanY + scanFrameSize - cornerSize, width: cornerSize, height: cornerSize)
+        view.addSubview(bottomLeft)
+
+        // Bottom-right corner - positioned at hole's bottom-right
+        let bottomRight = UIImageView(image: bottomRightImage)
+        bottomRight.frame = CGRect(x: scanX + scanFrameSize - cornerSize, y: scanY + scanFrameSize - cornerSize, width: cornerSize, height: cornerSize)
+        view.addSubview(bottomRight)
+    }
+
+    enum CornerPosition {
+        case topLeft, topRight, bottomLeft, bottomRight
+    }
+
+    // MARK: - Corner Images
+    // TODO: Add 4 corner images to Assets.xcassets:
+    // - corner_top_left (40x40pt, white L-shape, rounded)
+    // - corner_top_right (40x40pt, white L-shape, rounded)
+    // - corner_bottom_left (40x40pt, white L-shape, rounded)
+    // - corner_bottom_right (40x40pt, white L-shape, rounded)
+    // Recommended: Export as PDF (vector) or PNG @2x/@3x from Figma
+
+    private func createCornerBracketPlaceholder(size: CGFloat, corner: CornerPosition) -> UIImage {
+        let imageName: String
+        switch corner {
+        case .topLeft: imageName = "corner_top_left"
+        case .topRight: imageName = "corner_top_right"
+        case .bottomLeft: imageName = "corner_bottom_left"
+        case .bottomRight: imageName = "corner_bottom_right"
         }
+
+        // Load from Assets.xcassets
+        if let image = UIImage(named: imageName) {
+            return image
+        }
+
+        // Fallback: return empty transparent image if assets not added yet
+        return UIImage()
     }
 
     private func setupPaymentLogos() {
@@ -215,9 +265,13 @@ class LPBankScannerOverlay: UIViewController, BankQRScannerOverlay {
         let bottomRow = createPaymentLogoRow(texts: ["napas 247", "SmartPay"])
         paymentLogosStack.addArrangedSubview(bottomRow)
 
+        // Position below the scan area (calculated position, not using scanFrameView)
+        let scanY = (view.bounds.height - scanFrameSize) / 2 - 20
+        let paymentLogosY = scanY + scanFrameSize + 24
+
         NSLayoutConstraint.activate([
             paymentLogosStack.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            paymentLogosStack.topAnchor.constraint(equalTo: scanFrameView.bottomAnchor, constant: 24)
+            paymentLogosStack.topAnchor.constraint(equalTo: view.topAnchor, constant: paymentLogosY)
         ])
 
         // TODO: Replace text labels with actual logo images
@@ -303,20 +357,25 @@ class LPBankScannerOverlay: UIViewController, BankQRScannerOverlay {
     }
 
     private func configureVerticalButton(_ button: UIButton) {
-        button.titleLabel?.textAlignment = .center
-        button.imageView?.contentMode = .scaleAspectFit
+        // Use modern UIButton.Configuration for iOS 15+
+        var config = UIButton.Configuration.plain()
+        config.imagePlacement = .top  // Icon above text
+        config.imagePadding = 8       // Spacing between icon and text
+        config.baseForegroundColor = .white
 
-        // Stack icon above text
-        button.contentVerticalAlignment = .center
+        // Set title
+        var titleAttr = AttributedString(button.title(for: .normal) ?? "")
+        titleAttr.font = .systemFont(ofSize: 14, weight: .medium)
+        config.attributedTitle = titleAttr
+
+        // Set image
+        if let image = button.image(for: .normal) {
+            let largerImage = image.withConfiguration(UIImage.SymbolConfiguration(pointSize: 20))
+            config.image = largerImage
+        }
+
+        button.configuration = config
         button.contentHorizontalAlignment = .center
-
-        let spacing: CGFloat = 4
-        button.imageEdgeInsets = UIEdgeInsets(top: 0, left: 0, bottom: spacing, right: 0)
-        button.titleEdgeInsets = UIEdgeInsets(top: spacing, left: -button.imageView!.frame.width, bottom: 0, right: 0)
-
-        // Ensure icon and title are vertically stacked
-        button.transform = CGAffineTransform.identity
-        button.titleLabel?.numberOfLines = 1
     }
 
     // MARK: - Actions

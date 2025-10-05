@@ -88,6 +88,17 @@ public class BankQRScannerViewController: UIViewController {
     private var overlayViewController: UIViewController?
     private var scanAreaView: UIView?
 
+    // Simulator support
+    private var isRunningOnSimulator: Bool {
+        #if targetEnvironment(simulator)
+        return true
+        #else
+        return false
+        #endif
+    }
+
+    private var simulatorMockButton: UIButton?
+
     public override func viewDidLoad() {
         super.viewDidLoad()
         setupCamera()
@@ -104,6 +115,11 @@ public class BankQRScannerViewController: UIViewController {
     }
 
     private func setupCamera() {
+        // Skip camera setup on simulator
+        if isRunningOnSimulator {
+            return
+        }
+
         guard let device = AVCaptureDevice.default(for: .video) else {
             delegate?.didFailScanning(error: .cameraNotAvailable)
             return
@@ -127,17 +143,43 @@ public class BankQRScannerViewController: UIViewController {
     }
 
     private func setupUI() {
-        guard let session = captureSession else { return }
-
         view.backgroundColor = .black
         title = "Scan QR Code"
 
-        // Setup camera preview
-        let preview = AVCaptureVideoPreviewLayer(session: session)
-        preview.frame = view.bounds
-        preview.videoGravity = .resizeAspectFill
-        view.layer.addSublayer(preview)
-        previewLayer = preview
+        // Setup camera preview (only on real device)
+        if let session = captureSession {
+            let preview = AVCaptureVideoPreviewLayer(session: session)
+            preview.frame = view.bounds
+            preview.videoGravity = .resizeAspectFill
+            view.layer.addSublayer(preview)
+            previewLayer = preview
+
+            // Start camera session on background thread to avoid UI blocking
+            DispatchQueue.global(qos: .userInitiated).async {
+                session.startRunning()
+            }
+        } else if isRunningOnSimulator {
+            // On simulator, show a mock camera background
+            let mockCameraView = UIView(frame: view.bounds)
+            mockCameraView.backgroundColor = UIColor(white: 0.15, alpha: 1.0)
+            mockCameraView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+            view.addSubview(mockCameraView)
+
+            // Add a label indicating it's simulator mode
+            let infoLabel = UILabel()
+            infoLabel.text = "Simulator Mode\nCamera preview not available"
+            infoLabel.textAlignment = .center
+            infoLabel.numberOfLines = 2
+            infoLabel.textColor = UIColor.white.withAlphaComponent(0.5)
+            infoLabel.font = .systemFont(ofSize: 14, weight: .medium)
+            infoLabel.translatesAutoresizingMaskIntoConstraints = false
+            mockCameraView.addSubview(infoLabel)
+
+            NSLayoutConstraint.activate([
+                infoLabel.centerXAnchor.constraint(equalTo: mockCameraView.centerXAnchor),
+                infoLabel.topAnchor.constraint(equalTo: mockCameraView.safeAreaLayoutGuide.topAnchor, constant: 20)
+            ])
+        }
 
         // Setup overlay
         setupOverlay()
@@ -148,7 +190,10 @@ public class BankQRScannerViewController: UIViewController {
             action: #selector(cancelTapped)
         )
 
-        session.startRunning()
+        // Add test button for simulator
+        if isRunningOnSimulator {
+            setupSimulatorTestButton()
+        }
     }
 
     private func setupOverlay() {
@@ -262,8 +307,60 @@ public class BankQRScannerViewController: UIViewController {
         return CGRect(x: scanX, y: scanY, width: scanSize, height: scanSize)
     }
 
+    private func setupSimulatorTestButton() {
+        let button = UIButton(type: .system)
+        button.setTitle("Simulate QR Scan", for: .normal)
+        button.titleLabel?.font = .systemFont(ofSize: 16, weight: .semibold)
+        button.backgroundColor = UIColor.systemBlue
+        button.setTitleColor(.white, for: .normal)
+        button.layer.cornerRadius = 12
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.addTarget(self, action: #selector(simulateQRScan), for: .touchUpInside)
+        view.addSubview(button)
+
+        NSLayoutConstraint.activate([
+            button.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            button.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -140),
+            button.widthAnchor.constraint(equalToConstant: 200),
+            button.heightAnchor.constraint(equalToConstant: 50)
+        ])
+
+        simulatorMockButton = button
+    }
+
+    @objc private func simulateQRScan() {
+        // Test VietQR string (Valid EMVCo format with proper TLV structure)
+        // Bank BIN: 970436, Account: 0011001800879, Amount: 100000, Purpose: "nhan tien"
+        let testVietQRString = "00020101021238570010A00000072701270006970436011300110018008790208QRIBFTTA530370454061000005802VN62130809nhan tien6304D1EF"
+
+        // Parse using factory
+        guard let qrCode = BankQRFactory.shared.parseBankQR(from: testVietQRString) else {
+            showSimulatorAlert(title: "Parse Failed", message: "Could not parse test QR code")
+            return
+        }
+
+        // Mark as scanned
+        hasScanned = true
+
+        // Haptic feedback
+        let generator = UINotificationFeedbackGenerator()
+        generator.notificationOccurred(.success)
+
+        // Notify delegate
+        delegate?.didScanBankQR(qrCode)
+    }
+
+    private func showSimulatorAlert(title: String, message: String) {
+        let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK", style: .default))
+        present(alert, animated: true)
+    }
+
     @objc private func cancelTapped() {
-        captureSession?.stopRunning()
+        // Stop camera session on background thread
+        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+            self?.captureSession?.stopRunning()
+        }
         dismiss(animated: true)
     }
 
@@ -361,11 +458,17 @@ public class VietQRScannerViewController: UIViewController {
             action: #selector(cancelTapped)
         )
 
-        session.startRunning()
+        // Start camera session on background thread
+        DispatchQueue.global(qos: .userInitiated).async {
+            session.startRunning()
+        }
     }
 
     @objc private func cancelTapped() {
-        captureSession?.stopRunning()
+        // Stop camera session on background thread
+        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+            self?.captureSession?.stopRunning()
+        }
         dismiss(animated: true)
     }
 
