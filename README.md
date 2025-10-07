@@ -116,9 +116,12 @@ let qrString = VNBankQR.shared.generateVietQRString(from: vietQR)
 
 ### 4. Scan QR Code
 
+#### Basic Scanner
+
 ```swift
 class MyViewController: UIViewController, BankQRScannerDelegate {
     func showScanner() {
+        // Use default scanner
         let scanner = VNBankQR.shared.createScanner(delegate: self)
         present(scanner, animated: true)
     }
@@ -135,6 +138,95 @@ class MyViewController: UIViewController, BankQRScannerDelegate {
     }
 }
 ```
+
+#### Scanner with Custom Overlay (UIView - Simple)
+
+```swift
+// Customize overlay appearance
+let config = ScannerConfiguration(
+    scanAreaSize: 280,              // Square size for scanning area
+    scanAreaCornerRadius: 16,       // Corner radius
+    overlayColor: UIColor.black.withAlphaComponent(0.6),  // Dimmed background
+    scanAreaBorderColor: .systemGreen,  // Border color
+    scanAreaBorderWidth: 3          // Border width
+)
+let scanner = VNBankQR.shared.createScanner(delegate: self, configuration: config)
+present(scanner, animated: true)
+```
+
+#### Scanner with Custom UIView Overlay
+
+```swift
+// Create your own overlay view (for simple static UI)
+let customOverlay = UIView()
+// Add your custom UI elements (labels, frames, instructions, etc.)
+
+let config = ScannerConfiguration(customOverlay: customOverlay)
+let scanner = VNBankQR.shared.createScanner(delegate: self, configuration: config)
+present(scanner, animated: true)
+```
+
+#### Scanner with Custom UIViewController Overlay (Recommended for Complex UI)
+
+```swift
+// Create a custom UIViewController for complex overlay UI
+// Conform to BankQRScannerOverlay protocol to provide scan area
+class ScannerOverlayViewController: UIViewController, BankQRScannerOverlay {
+    private let scanFrameView = UIView()
+
+    // Provide scan area to the scanner for focused QR detection
+    var scanAreaRect: CGRect? {
+        return scanFrameView.frame  // Return the frame of your scan area
+    }
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        // Add instruction labels
+        // Add flashlight toggle button
+        // Add manual entry button
+        // Setup scanFrameView with your desired size and position
+        // Handle user interactions
+        // Full view controller lifecycle support
+    }
+}
+
+// Use the custom overlay
+let overlayVC = ScannerOverlayViewController()
+let config = ScannerConfiguration(customOverlayViewController: overlayVC)
+let scanner = VNBankQR.shared.createScanner(delegate: self, configuration: config)
+present(scanner, animated: true)
+```
+
+#### BankQRScannerOverlay Protocol
+
+Custom overlays (UIView or UIViewController) can conform to this protocol to provide the scan area:
+
+```swift
+public protocol BankQRScannerOverlay {
+    /// The frame of the scanning area in the overlay's coordinate system
+    /// This will be converted to AVFoundation's rectOfInterest
+    /// Return nil to use the full screen as scanning area
+    var scanAreaRect: CGRect? { get }
+}
+```
+
+**How it works:**
+1. Scanner checks if your custom overlay conforms to `BankQRScannerOverlay`
+2. If yes, it calls `scanAreaRect` to get the scan area
+3. Converts the rect to AVFoundation's `rectOfInterest` for focused scanning
+4. If no protocol conformance, uses the configuration's `scanAreaSize`
+
+**Key Features:**
+- **Region of Interest**: Scanner automatically focuses on the square area for faster and more accurate scanning
+- **Default Overlay**: Built-in overlay with dimmed background and clear scanning area
+- **UIView Overlay**: Lightweight option for simple static UI elements
+- **UIViewController Overlay**: Recommended for complex UI with buttons, forms, animations, and lifecycle management
+- **Configurable**: Adjust size, colors, and appearance to match your app's design
+
+**When to use each approach:**
+- **Default**: Quick integration, no customization needed
+- **UIView**: Simple overlays with static elements (labels, frames, branding)
+- **UIViewController**: Complex overlays with buttons, flashlight control, manual entry, animations, or navigation
 
 ## Repository Structure
 
@@ -208,7 +300,10 @@ VNBankQR/
 
 ```swift
 // Scanner
-func createScanner(delegate: BankQRScannerDelegate) -> BankQRScannerViewController
+func createScanner(
+    delegate: BankQRScannerDelegate,
+    configuration: ScannerConfiguration?
+) -> BankQRScannerViewController
 
 // Parser
 func parse(qrString: String) -> (any BankQRProtocol)?
