@@ -2,7 +2,7 @@
 //  ViewController.swift
 //  VNBankQRDemo
 //
-//  Demo app showing VNBankQR package usage
+//  Demo app showing VNBankQR package usage - Generator & Parser
 //
 
 import UIKit
@@ -82,7 +82,7 @@ class ViewController: UIViewController {
         stackView.addArrangedSubview(qrStringLabel)
 
         // Action buttons
-        let scanBtn = createButton(title: "📷 Scan QR", action: #selector(scanTapped))
+        let scanBtn = createButton(title: "📷 Scanner Examples", action: #selector(scannerExamplesTapped))
         let selectBtn = createButton(title: "🖼 Select Image", action: #selector(selectTapped))
         let testBtn = createButton(title: "🧪 Test Parse", action: #selector(testTapped))
 
@@ -124,10 +124,12 @@ class ViewController: UIViewController {
 
     private func setupDemo() {
         bankBinField.text = "970436"
-        accountField.text = "113001180087902"
+        accountField.text = "0011001800879"
         amountField.text = "10000"
-        descField.text = "QRIBFTTA"
+        descField.text = "transfer money"
     }
+
+    // MARK: - Actions
 
     @objc private func generateTapped() {
         guard let bin = bankBinField.text, !bin.isEmpty,
@@ -153,9 +155,9 @@ class ViewController: UIViewController {
         }
     }
 
-    @objc private func scanTapped() {
-        let scanner = VNBankQR.shared.createScanner(delegate: self)
-        present(scanner, animated: true)
+    @objc private func scannerExamplesTapped() {
+        let scannerExamples = ScannerExamplesViewController()
+        navigationController?.pushViewController(scannerExamples, animated: true)
     }
 
     @objc private func selectTapped() {
@@ -236,27 +238,6 @@ class ViewController: UIViewController {
         let alert = UIAlertController(title: nil, message: message, preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "OK", style: .default))
         present(alert, animated: true)
-    }
-}
-
-// MARK: - BankQRScannerDelegate
-
-extension ViewController: BankQRScannerDelegate {
-    func didScanBankQR(_ qrCode: any BankQRProtocol) {
-        dismiss(animated: true)
-
-        if let vietQR = qrCode as? VietQR {
-            bankBinField.text = vietQR.bankBin
-            accountField.text = vietQR.accountNumber
-            amountField.text = vietQR.amount
-            descField.text = vietQR.purpose
-            resultLabel.text = "✅ Scanned:\n\n" + vietQR.displayInfo
-        }
-    }
-
-    func didFailScanning(error: BankQRError) {
-        dismiss(animated: true)
-        showAlert("Scan failed: \(error.localizedDescription)")
     }
 }
 
